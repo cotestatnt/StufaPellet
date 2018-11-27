@@ -6,28 +6,18 @@
 #include <WiFiManager.h>        //https://github.com/tzapu/WiFiManager
 #include <CTBot.h>              //https://github.com/shurillu/CTBot
 
-CTBot myBot;
-CTBotInlineKeyboard myKbd, goKbd;  // custom inline keyboard object helper
-
 #define OFF LOW
 #define ON HIGH
 #define TELEGRAM_TIME 500
 #define UPDATE_TEMP_TIME 1000
 #define CHECK_ON_TIME 20000
-
-String token;
-
-const uint8_t OUT = D1;    
-uint32_t checkTelegramTime, updateTempTime, checkTempTime; 
-uint8_t statoBruciatore = ON;
-
-// Dallas DS18B20
-#define ONE_WIRE_BUS D3
-OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature sensors(&oneWire);
-DeviceAddress ds18b20;
-float  ActualTemp = 25.0F;
 #define ON_TEMP 45.0F
+
+#define START_CALLBACK  "Comando bruciatore ON" 
+#define STOP_CALLBACK "Comando bruciatore OFF"
+#define STATE_CALLBACK "Stato bruciatore"
+#define CONFIRM_CALLBACK "Esegui"
+#define CANCEL_CALLBACK "Annulla"
 
 typedef enum { WAIT = -1, STOP = 0, START = 1, STATE = 3};
 typedef struct  {
@@ -37,21 +27,31 @@ typedef struct  {
   uint16_t value2;
 } telegramCmd;
 
-telegramCmd cmdMsg;
+const uint8_t OUT = D1;    
+uint32_t checkTelegramTime, updateTempTime, checkTempTime; 
+uint8_t heatStatus = ON;
+
+// Telegram vars
+CTBot myBot;
+CTBotInlineKeyboard myKbd, goKbd;  // custom inline keyboard object helper
+String token;
 TBMessage msg;
+telegramCmd cmdMsg;
 
-#define START_CALLBACK  "Comando bruciatore ON" 
-#define STOP_CALLBACK "Comando bruciatore OFF"
-#define STATE_CALLBACK "Stato bruciatore"
-#define CONFIRM_CALLBACK "Esegui"
-#define CANCEL_CALLBACK "Annulla"
+// Dallas DS18B20
+#define ONE_WIRE_BUS D3
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+DeviceAddress ds18b20;
+float  ActualTemp = 25.0F;
 
+// Wifi handler
 WiFiEventHandler connectedHandler;
 WiFiEventHandler disconnectedHandler;
 
-void setup() {	
+void setup() {  
   pinMode(OUT, OUTPUT);
-  Serial.begin(115200);	
+  Serial.begin(115200); 
   connectedHandler = WiFi.onStationModeConnected(&onConnection);
   disconnectedHandler = WiFi.onStationModeDisconnected(&onDisconnection);
     
@@ -77,12 +77,12 @@ void setup() {
   sensors.requestTemperatures();
   ActualTemp = sensors.getTempC(ds18b20);
   if (ActualTemp > ON_TEMP)
-    statoBruciatore = ON;      
+    heatStatus = ON;      
   else 
-    statoBruciatore = OFF;     
+    heatStatus = OFF;     
 }
 
-void loop() {	
+void loop() { 
   
   if(millis() - checkTelegramTime > TELEGRAM_TIME){
     checkTelegramTime = millis();
@@ -103,7 +103,7 @@ void loop() {
                          (int)ActualTemp, (int)(ActualTemp*100)%100);                                
       myBot.sendMessage(msg.sender.id, tx_buffer);   
       Serial.println(tx_buffer);
-      statoBruciatore = ON;
+      heatStatus = ON;
       cmdMsg.request = WAIT;         
     }
     else{
@@ -111,7 +111,7 @@ void loop() {
                          (int)ActualTemp, (int)(ActualTemp*100)%100);                                
       myBot.sendMessage(msg.sender.id, tx_buffer);   
       Serial.println(tx_buffer);
-      statoBruciatore = OFF;
+      heatStatus = OFF;
       cmdMsg.request = WAIT;      
     }
     
@@ -119,12 +119,12 @@ void loop() {
 
   if(cmdMsg.confirm == true){
     cmdMsg.confirm = false;
-    if(cmdMsg.request == START && statoBruciatore == OFF){
+    if(cmdMsg.request == START && heatStatus == OFF){
       digitalWrite(OUT, ON);   
       delay(2000);
       digitalWrite(OUT, OFF);      
     } 
-    else if(cmdMsg.request == STOP && statoBruciatore == ON){
+    else if(cmdMsg.request == STOP && heatStatus == ON){
       digitalWrite(OUT, ON);
       delay(2000);
       digitalWrite(OUT, OFF);        
@@ -167,7 +167,7 @@ void checkTelegramKbd(){
     char tx_buffer[TX_SIZE];
     if (msg.messageType == CTBotMessageText) {       
       sprintf(tx_buffer, "Ciao %s.!\nStato bruciatore : %s\nTemperatura acqua : %02d.%02d°C\n",
-              msg.sender.username.c_str(), statoBruciatore ? "ON" : "OFF", (int)ActualTemp, (int)(ActualTemp * 100) % 100);
+              msg.sender.username.c_str(), heatStatus ? "ON" : "OFF", (int)ActualTemp, (int)(ActualTemp * 100) % 100);
       myBot.sendMessage(msg.sender.id, tx_buffer, myKbd);
     } 
     else if (msg.messageType == CTBotMessageQuery) {      
@@ -187,7 +187,7 @@ void checkTelegramKbd(){
       else if (msg.callbackQueryData.equals(STATE_CALLBACK)) {
         cmdMsg.confirm = false;        
         sprintf(tx_buffer, "Stato bruciatore: %s\nTemperatura acqua: %02d.%02d°C\n",
-                            statoBruciatore ? "ON" : "OFF", (int)ActualTemp, (int)(ActualTemp*100)%100);
+                            heatStatus ? "ON" : "OFF", (int)ActualTemp, (int)(ActualTemp*100)%100);
         myBot.endQuery(msg.callbackQueryID, "");                                  
         myBot.sendMessage(msg.sender.id, tx_buffer);   
       }
