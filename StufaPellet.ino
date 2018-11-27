@@ -15,7 +15,6 @@ CTBotInlineKeyboard myKbd, goKbd;  // custom inline keyboard object helper
 #define UPDATE_TEMP_TIME 1000
 #define CHECK_ON_TIME 20000
 
-//String token = "488075445:AAG5S_I2MHDOtMK8v4U8QhcogrKef1Yltd8";  
 String token;
 
 const uint8_t OUT = D1;    
@@ -52,12 +51,12 @@ WiFiEventHandler disconnectedHandler;
 
 void setup() {	
   pinMode(OUT, OUTPUT);
-	Serial.begin(115200);	
+  Serial.begin(115200);	
   connectedHandler = WiFi.onStationModeConnected(&onConnection);
   disconnectedHandler = WiFi.onStationModeDisconnected(&onDisconnection);
     
   WiFiManager wifiManager;  
-  WiFiManagerParameter telegramToken("Telegram", "Token", "782955778:AAH4i5TyacBag5FMVzAUGUnVX3JhpjFrR-M", 50);
+  WiFiManagerParameter telegramToken("Telegram", "Token", "token_placeholder", 50);
   //wifiManager.resetSettings();
   wifiManager.setSaveConfigCallback(saveConfigCallback);
   wifiManager.setConfigPortalTimeout(180);  
@@ -135,16 +134,15 @@ void loop() {
 }
 
 void saveConfigCallback() {
-  Serial.println("Should save config");  
+  Serial.println("Congigurazione salvata in EEPROM");  
 }
 
 
 void onConnection(const WiFiEventStationModeConnected& evt) {
-  Serial.println("\nWiFi connected");   
-  Serial.println("Starting TelegramBot...");  
+  Serial.println("\nWiFi connesso");     
   //myBot.wifiConnect(ssid, pass);
   myBot.setTelegramToken(token);
-  Serial.print("\nTelegram test connection ");
+  Serial.print("\nTelegram test connessione ");
   Serial.println(myBot.testConnection() ? "OK" : "NOT OK");   
   myKbd.flushData();
   myKbd.addButton("START", START_CALLBACK, CTBotKeyboardButtonQuery); 
@@ -214,52 +212,3 @@ void checkTelegramKbd(){
   }
   
 }
-
-
-
-
-
-
-/*
-void checkTelegram(){  
-  if (myBot.getNewMessage(msg)) {    
-    if (msg.text.equalsIgnoreCase("/accendi")) { 
-      cmdMsg.request = ON;   
-      cmdMsg.confirm = false;         
-      myBot.sendMessage(msg.sender.id, "Comando di accensione caldaia ricevuto.."); 
-      delay(100);
-      myBot.sendMessage(msg.sender.id, "Confermi l'esecuzione?\n\n/esegui             /annulla"); 
-    }
-    else if (msg.text.equalsIgnoreCase("/spegni")) {     
-      cmdMsg.request = OFF;    
-      cmdMsg.confirm = false;                           
-      myBot.sendMessage(msg.sender.id, "Comando di spegnimento caldaia ricevuto..");
-      delay(100);
-      myBot.sendMessage(msg.sender.id, "Confermi l'esecuzione?\n\n/esegui             /annulla"); 
-    }
-    else if (msg.text.equalsIgnoreCase("/esegui")) {     
-      cmdMsg.confirm = true;                           
-      myBot.sendMessage(msg.sender.id, "Comando eseguito.");    
-      checkTempTime = millis();  
-    }
-    else if (msg.text.equalsIgnoreCase("/annulla")) {     
-      cmdMsg.confirm = false;                           
-      myBot.sendMessage(msg.sender.id, "Comando annullato.");
-    }   
-    else if (msg.text.equalsIgnoreCase("/status")) {   
-      char tx_buffer[50];
-      sprintf(tx_buffer, "Stato caldaia: %s\nTemperatura acqua: %02d.%02d°C\n",
-              digitalRead(OUT) ? "ON" : "OFF", (int)ActualTemp, (int)(ActualTemp*100)%100);                                
-      myBot.sendMessage(msg.sender.id, tx_buffer);   
-    }
-    else {                                                      
-      String reply;
-      reply = (String)"Ciao " + msg.sender.username + 
-              (String)"\n/accendi - per accendere la caldaia." +
-              (String)"\n/spegni - per spegnere la caldaia." +
-              (String)"\n/stato - per conoscere lo stato attuale.";
-      myBot.sendMessage(msg.sender.id, reply);         
-    }
-  }  
-}
-*/
