@@ -29,7 +29,7 @@ DeviceAddress ds18b20;
 float  ActualTemp = 25.0F;
 #define ON_TEMP 45.0F
 
-typedef enum { WAIT = -1, STOP = 0, START = 1, STATE = 3, TIME_ON = 4, TIME_OFF = 5 };
+typedef enum { WAIT = -1, STOP = 0, START = 1, STATE = 3};
 typedef struct  {
   int request = WAIT;
   bool confirm = false;
