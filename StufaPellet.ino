@@ -26,8 +26,8 @@ typedef enum { WAIT = -1, STOP = 0, START = 1, STATE = 3};
 typedef struct  {
   int request = WAIT;
   bool confirm = false;
-  uint16_t value1;
-  uint16_t value2;
+  uint16_t value1;   // Variabili previste per inviare parametri da Telegram. Non usate in questo sketch
+  uint16_t value2;   // Variabili previste per inviare parametri da Telegram. Non usate in questo sketch
 } telegramCmd;
 
 // Vars
