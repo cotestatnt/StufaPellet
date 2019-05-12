@@ -13,7 +13,7 @@
 #define CHECK_ON_TIME 20000     // CHECK_ON_TIME ms dopo aver attivato la caldaia, eseguo una verifica sulla temperatura raggiunta
 #define ON_TEMP 45.0F           // Temperatura oltre la quale considero la caldaia partita correttamente
 
-// Messaggi di callback per Telegram a seguito di query
+// Messaggi di callback per Telegram per esecuzione query
 #define START_CALLBACK  "Comando bruciatore ON" 
 #define STOP_CALLBACK "Comando bruciatore OFF"
 #define STATE_CALLBACK "Stato bruciatore"
