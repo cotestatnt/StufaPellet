@@ -9,8 +9,8 @@
 #include <TelegramBotClient.h>  //https://github.com/schlingensiepen/TelegramBotClient
 #include <WebSocketsClient.h> 
 
-String MyApiKey = "137a122e-9b05-4d76-9046-e887b56926d3";
-String DEVICE1 = "5df10e27952b38749d2c9d33";
+String MyApiKey = "137a122e-9b95-4d76-9089-e887b56345d3";
+String DEVICE1 = "5df10e2795bc58749d2c4563";
 
 WiFiEventHandler disconnectedEventHandler;
 WiFiEventHandler gotIpEventHandler;
